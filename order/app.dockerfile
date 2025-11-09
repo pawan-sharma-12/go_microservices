@@ -3,7 +3,7 @@
 # ----------------------
     FROM golang:1.21-alpine AS builder
 
-    # Install necessary build tools
+    # Install required packages
     RUN apk --no-cache add gcc g++ make ca-certificates git
     
     # Set working directory
@@ -15,29 +15,31 @@
     # Copy vendor directory if using vendoring
     COPY vendor vendor
     
-    # Copy account microservice code
+    # Copy microservice code (and dependencies if needed)
+    COPY order order
     COPY account account
+    COPY catalog catalog
     
-    # Build the binary (as you requested)
-    RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./account/cmd/account
+    # Build the binary
+    RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./order/cmd/order
     
     # ----------------------
     # Stage 2: Minimal runtime image
     # ----------------------
     FROM alpine:latest
     
-    # Install certificates for HTTPS if needed
+    # Install certificates for HTTPS
     RUN apk --no-cache add ca-certificates
     
     # Set working directory
     WORKDIR /usr/bin
     
-    # Copy the built binary
+    # Copy the built binary from builder
     COPY --from=builder /go/bin/app .
     
     # Expose the service port
     EXPOSE 8080
     
-    # Run the microservice
+    # Command to run the microservice
     CMD ["app"]
     

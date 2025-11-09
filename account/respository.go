@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"database/sql"
+
 	_ "github.com/lib/pq"
 )
 type Repository interface {
@@ -16,15 +17,20 @@ type postgresRepository struct {
 	db *sql.DB
 }
 
-func NewPostgresRepository(url string)( Repository, error) {
-	if db, err := sql.Open("postgres", url) ; err != nil || db.Ping() !=  nil {
-		return nil, err
-	}  else {
-		return &postgresRepository{
-			db: db,
-		}, nil
-		}
+func NewPostgresRepository(url string) (Repository, error) {
+    db, err := sql.Open("postgres", url)
+    if err != nil {
+        return nil, err
+    }
+
+    if err := db.Ping(); err != nil {
+        db.Close()
+        return nil, err
+    }
+
+    return &postgresRepository{db: db}, nil
 }
+
 
 func (r *postgresRepository) Close() {
 	r.db.Close()

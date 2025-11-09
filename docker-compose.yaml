@@ -1,8 +1,136 @@
+version: "3.9"
+
 services:
+  # -------------------
+  # Account Microservice
+  # -------------------
   account:
+    build:
+      context: .
+      dockerfile: account/app.dockerfile
+    container_name: account_service
+    depends_on:
+      - account_db
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@account_db:5432/account_db?sslmode=disable
+      - ACCOUNT_SERVICE_URL=account:8080
+    ports:
+      - "50051:8080"
+    networks:
+      - micro_net
+
+  # -------------------
+  # Catalog Microservice
+  # -------------------
   catalog:
+    build:
+      context: .
+      dockerfile: catalog/app.dockerfile
+    container_name: catalog_service
+    depends_on:
+      - catalog_db
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@catalog_db:5432/catalog_db?sslmode=disable
+      - CATALOG_SERVICE_URL=catalog:8080
+    ports:
+      - "50052:8080"
+    networks:
+      - micro_net
+
+  # -------------------
+  # Order Microservice
+  # -------------------
   order:
+    build:
+      context: .
+      dockerfile: order/app.dockerfile
+    container_name: order_service
+    depends_on:
+      - order_db
+      - account
+      - catalog
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@order_db:5432/order_db?sslmode=disable
+      - ACCOUNT_SERVICE_URL=account:8080
+      - CATALOG_SERVICE_URL=catalog:8080
+    ports:
+      - "50053:8080"
+    networks:
+      - micro_net
+
+  # -------------------
+  # GraphQL Gateway (optional)
+  # -------------------
   graphql:
+    build:
+      context: .
+      dockerfile: graphql/app.dockerfile
+    container_name: graphql_gateway
+    depends_on:
+      - order
+      - account
+      - catalog
+    environment:
+      - ORDER_SERVICE_URL=order:8080
+      - ACCOUNT_SERVICE_URL=account:8080
+      - CATALOG_SERVICE_URL=catalog:8080
+    ports:
+      - "8080:8080"
+    networks:
+      - micro_net
+
+  # -------------------
+  # Databases
+  # -------------------
   account_db:
+    image: postgres:15-alpine
+    container_name: account_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: account_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - account_data:/var/lib/postgresql/data
+    networks:
+      - micro_net
+
   catalog_db:
-  order_db
+    image: postgres:15-alpine
+    container_name: catalog_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: catalog_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - catalog_data:/var/lib/postgresql/data
+    networks:
+      - micro_net
+
+  order_db:
+    image: postgres:15-alpine
+    container_name: order_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: order_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - order_data:/var/lib/postgresql/data
+    networks:
+      - micro_net
+
+# -------------------
+# Networks & Volumes
+# -------------------
+networks:
+  micro_net:
+
+volumes:
+  account_data:
+  catalog_data:
+  order_data:

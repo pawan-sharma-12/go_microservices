@@ -2,9 +2,7 @@
 
 package main
 
-import (
-	"time"
-)
+
 
 type AccountInput struct {
 	Name string `json:"name"`
@@ -14,10 +12,10 @@ type Mutation struct {
 }
 
 type Order struct {
-	ID         string            `json:"id"`
-	CreateAt   time.Time         `json:"createAt"`
-	TotalPrice float64           `json:"totalPrice"`
-	Products   []*OrderedProduct `json:"products"`
+	ID 	  string   `json:"id"`
+	CreatedAt string   `json:"createAt"`
+	TotalPrice float64  `json:"totalPrice"`
+	Products []OrderedProduct `json:"products"`
 }
 
 type OrderInput struct {
@@ -31,11 +29,11 @@ type OrderProductInput struct {
 }
 
 type OrderedProduct struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-	Quantity    int     `json:"quantity"`
+	ID 	  string `json:"id"`
+	Name  string `json:"name"`
+	Price float64 `json:"price"`
+	Quantity int    `json:"quantity"`
+	Description string `json:"description"`
 }
 
 type PaginationInput struct {
