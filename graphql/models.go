@@ -1,10 +1,7 @@
 package main
 
-type Account struct{
-	ID 	  string `json:"id"`
-	Name  string `json:"name"`
-	Orders	[]Order `json:"orders"`
-}
+// Account type is auto-generated in models_gen.go
+// The orders field is resolved via accountResolver.Orders() method
 // type Order struct{
 // 	ID 	  string   `json:"id"`
 // 	CreatedAt string   `json:"createAt"`

@@ -51,12 +51,18 @@ func (r *mutationResolver) CreateProduct(ctx context.Context, in ProductInput) (
 	}, nil
 }
 func (r *mutationResolver) CreateOrder(ctx context.Context, in OrderInput) (*Order, error) {
+	log.Printf("📝 CreateOrder called with AccountID: %s, Products: %+v", in.AccountID, in.Products)
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	var products []order.OrderProduct 
 	for _, p := range in.Products{
+		log.Printf("📝 Processing product: ID=%s, Quantity=%d", p.ID, p.Quantity)
 		if p.Quantity <= 0{
 			return  nil, ErrInvalidParameter
+		}
+		// Ensure safe conversion from int to uint64
+		if p.Quantity < 0 {
+			return nil, ErrInvalidParameter
 		}
 		products = append(products, order.OrderProduct{
 			ID : p.ID, 

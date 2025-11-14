@@ -1,0 +1,117 @@
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+.env.staging
+.env.test
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Go specific
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# Build directories
+build/
+dist/
+out/
+
+# Docker files (optional - uncomment if you want to ignore)
+# Dockerfile
+# docker-compose.yml
+# docker-compose.yaml
+
+# Kubernetes files (optional)
+*.yaml
+*.yml
+!docker-compose.yaml
+!docker-compose.yml
+
+# SSL certificates and keys
+*.pem
+*.key
+*.crt
+*.cert
+
+# Backup files
+*.bak
+*.backup
+
+# Test results and coverage
+coverage.html
+coverage.out
+test_results/
+
+# Generated protobuf files (optional - uncomment if you regenerate them)
+# pb/*.pb.go
+
+# Local development files
+.local/
+local/
+
+# Node modules (if using any JS tools)
+node_modules/
+
+# Python files (if using any Python tools)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Elasticsearch data
+elasticsearch/
+
+# PostgreSQL data
+postgres_data/
+pgdata/

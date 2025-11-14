@@ -25,12 +25,16 @@ type grpcServer struct {
 
 // ListenGRPC starts the gRPC server
 func ListenGRPC(s Service, accountURL, catalogURL string, port int) error {
+	log.Printf("🔗 Connecting to Account service at: %s", accountURL)
 	accountClient, err := account.NewClient(accountURL)
 	if err != nil {
+		log.Printf("❌ Failed to connect to Account service: %v", err)
 		return err
 	}
+	log.Printf("🔗 Connecting to Catalog service at: %s", catalogURL)
 	catalogClient, err := catalog.NewClient(catalogURL)
 	if err != nil {
+		log.Printf("❌ Failed to connect to Catalog service: %v", err)
 		accountClient.Close()
 		return err
 	}
@@ -109,8 +113,8 @@ func (s *grpcServer) PostOrder(ctx context.Context, req *pb.PostOrderRequest) (*
 	}, nil
 }
 
-// GetOrdersForAccount fetches all orders for an account
-func (s *grpcServer) GetOrdersForAccount(ctx context.Context, req *pb.GetOrderForAccountRequest) (*pb.GetOrderForAccountResponse, error) {
+// GetOrderForAccount fetches all orders for an account
+func (s *grpcServer) GetOrderForAccount(ctx context.Context, req *pb.GetOrderForAccountRequest) (*pb.GetOrderForAccountResponse, error) {
 	orders, err := s.service.GetOrdersForAccount(ctx, req.AccountId)
 	if err != nil {
 		log.Println("❌ Error fetching orders:", err)
@@ -119,6 +123,30 @@ func (s *grpcServer) GetOrdersForAccount(ctx context.Context, req *pb.GetOrderFo
 
 	var protoOrders []*pb.Order
 	for _, o := range orders {
+		// Fetch product details from catalog for each order
+		productIDs := []string{}
+		for _, p := range o.Products {
+			productIDs = append(productIDs, p.ID)
+		}
+
+		catalogProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
+		if err != nil {
+			log.Println("❌ Error fetching product details:", err)
+			return nil, err
+		}
+
+		// Merge quantities with catalog details
+		for i := range o.Products {
+			for _, cp := range catalogProducts {
+				if o.Products[i].ID == cp.ID {
+					o.Products[i].Name = cp.Name
+					o.Products[i].Description = cp.Description
+					o.Products[i].Price = cp.Price
+					break
+				}
+			}
+		}
+
 		protoOrders = append(protoOrders, &pb.Order{
 			Id:         o.ID,
 			AccountId:  o.AccountID,

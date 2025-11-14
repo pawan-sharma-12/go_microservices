@@ -90,8 +90,7 @@ func (r *postgresRepository) GetOrdersForAccount(ctx context.Context, accountID 
 		FROM orders o
 		JOIN order_products op ON o.id = op.order_id
 		WHERE o.account_id = $1
-		ORDER BY o.created_at
-		OFFSET $2 LIMIT $3`,
+		ORDER BY o.created_at`,
 		accountID,
 	)
 	if err != nil {

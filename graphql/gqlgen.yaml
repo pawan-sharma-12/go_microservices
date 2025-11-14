@@ -1,8 +1,11 @@
-schema : schema.graphql
+schema: schema.graphql
+exec:
+  filename: generated.go
+model:
+  filename: models_gen.go
 
 models:
   Account:
-    model: github.com/pawan-sharma-12/go_microservices/graphql.Account
     fields:
       orders:
         resolver: true

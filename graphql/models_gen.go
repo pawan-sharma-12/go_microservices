@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+type Account struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type AccountInput struct {
 	Name string `json:"name"`
 }

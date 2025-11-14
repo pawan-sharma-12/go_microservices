@@ -1,8 +1,278 @@
 {
-    "data": {
-      "createAccount": {
-        "id": "35SMrVBTmBdn3JfGeVFaHz7FZFg",
-        "name": "Pawan Sharma"
+  "description": "Complete test suite for Go Microservices GraphQL API",
+  "graphql_endpoint": "http://localhost:8000/graphql",
+  "playground_url": "http://localhost:8000/playground",
+  
+  "mutations": {
+    "createAccount": {
+      "description": "Create a new user account",
+      "query": "mutation CreateAccount {\n  createAccount(account: { name: \"Siddhartha\" }) {\n    id\n    name\n  }\n}",
+      "expected_response": {
+        "data": {
+          "createAccount": {
+            "id": "35Stv3CNJNcaIngE9iQ84lQY4nz",
+            "name": "Siddhartha"
+          }
+        }
+      }
+    },
+    
+    "createProduct": {
+      "description": "Create a new product in catalog",
+      "query": "mutation CreateProduct {\n  createProduct(\n    product: {\n      name: \"iPhone 17\"\n      description: \"Latest Apple Phone\"\n      price: 79999\n    }\n  ) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "expected_response": {
+        "data": {
+          "createProduct": {
+            "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+            "name": "iPhone 17",
+            "description": "Latest Apple Phone",
+            "price": 79999
+          }
+        }
+      }
+    },
+    
+    "createOrder": {
+      "description": "Create a new order with products",
+      "query": "mutation CreateOrder {\n  createOrder(\n    order: {\n      accountId: \"35Stv3CNJNcaIngE9iQ84lQY4nz\"\n      products: [\n        { id: \"35SxLb36a8QJugjbBSAWdRM9eQH\", quantity: 3 }\n      ]\n    }\n  ) {\n    id\n    createdAt\n    totalPrice\n  }\n}",
+      "expected_response": {
+        "data": {
+          "createOrder": {
+            "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+            "createdAt": "2024-01-15T10:30:00Z",
+            "totalPrice": 239997
+          }
+        }
       }
     }
+  },
+  
+  "queries": {
+    "getAllAccounts": {
+      "description": "Get all accounts with pagination",
+      "query": "query GetAccounts {\n  accounts(pagination: { skip: 0, take: 10 }) {\n    id\n    name\n  }\n}",
+      "expected_response": {
+        "data": {
+          "accounts": [
+            {
+              "id": "35Stv3CNJNcaIngE9iQ84lQY4nz",
+              "name": "Siddhartha"
+            }
+          ]
+        }
+      }
+    },
+    
+    "getAccountById": {
+      "description": "Get specific account by ID",
+      "query": "query GetAccount {\n  accounts(pagination: { skip: 0, take: 10 }, id: \"35Stv3CNJNcaIngE9iQ84lQY4nz\") {\n    id\n    name\n  }\n}",
+      "expected_response": {
+        "data": {
+          "accounts": [
+            {
+              "id": "35Stv3CNJNcaIngE9iQ84lQY4nz",
+              "name": "Siddhartha"
+            }
+          ]
+        }
+      }
+    },
+    
+    "getAllProducts": {
+      "description": "Get all products with pagination",
+      "query": "query GetProducts {\n  products(pagination: { skip: 0, take: 10 }) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "expected_response": {
+        "data": {
+          "products": [
+            {
+              "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+              "name": "iPhone 17",
+              "description": "Latest Apple Phone",
+              "price": 79999
+            }
+          ]
+        }
+      }
+    },
+    
+    "searchProducts": {
+      "description": "Search products by query string",
+      "query": "query SearchProducts {\n  products(\n    pagination: { skip: 0, take: 10 }\n    query: \"iphone 17\"\n  ) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "expected_response": {
+        "data": {
+          "products": [
+            {
+              "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+              "name": "iPhone 17",
+              "description": "Latest Apple Phone",
+              "price": 79999
+            }
+          ]
+        }
+      }
+    },
+    
+    "getProductById": {
+      "description": "Get specific product by ID",
+      "query": "query GetProduct {\n  products(\n    pagination: { skip: 0, take: 10 }\n    id: \"35StxhxpOc60H9ozwms0MYfAfZR\"\n  ) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "expected_response": {
+        "data": {
+          "products": [
+            {
+              "id": "35StxhxpOc60H9ozwms0MYfAfZR",
+              "name": "iPhone 17",
+              "description": "Latest Apple Phone",
+              "price": 79999
+            }
+          ]
+        }
+      }
+    },
+    
+    "getAccountWithOrders": {
+      "description": "Get account with all associated orders and product details",
+      "query": "query GetAccountWithOrders {\n  accounts(pagination: { skip: 0, take: 10 }, id: \"35Stv3CNJNcaIngE9iQ84lQY4nz\") {\n    id\n    name\n    orders {\n      id\n      createdAt\n      totalPrice\n      products {\n        id\n        name\n        description\n        price\n        quantity\n      }\n    }\n  }\n}",
+      "expected_response": {
+        "data": {
+          "accounts": [
+            {
+              "id": "35Stv3CNJNcaIngE9iQ84lQY4nz",
+              "name": "Siddhartha",
+              "orders": [
+                {
+                  "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+                  "createdAt": "2024-01-15T10:30:00Z",
+                  "totalPrice": 239997,
+                  "products": [
+                    {
+                      "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+                      "name": "iPhone 17",
+                      "description": "Latest Apple Phone",
+                      "price": 79999,
+                      "quantity": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  
+  "test_flow": {
+    "description": "Recommended testing sequence",
+    "steps": [
+      {
+        "step": 1,
+        "action": "Create Account",
+        "mutation": "createAccount",
+        "note": "Save the returned account ID for subsequent tests"
+      },
+      {
+        "step": 2,
+        "action": "Create Product",
+        "mutation": "createProduct",
+        "note": "Save the returned product ID for order creation"
+      },
+      {
+        "step": 3,
+        "action": "Create Order",
+        "mutation": "createOrder",
+        "note": "Use the account ID and product ID from previous steps"
+      },
+      {
+        "step": 4,
+        "action": "Query All Accounts",
+        "query": "getAllAccounts",
+        "note": "Verify account was created successfully"
+      },
+      {
+        "step": 5,
+        "action": "Query Specific Account",
+        "query": "getAccountById",
+        "note": "Test filtering by account ID"
+      },
+      {
+        "step": 6,
+        "action": "Query All Products",
+        "query": "getAllProducts",
+        "note": "Verify product was created successfully"
+      },
+      {
+        "step": 7,
+        "action": "Search Products",
+        "query": "searchProducts",
+        "note": "Test Elasticsearch search functionality"
+      },
+      {
+        "step": 8,
+        "action": "Query Specific Product",
+        "query": "getProductById",
+        "note": "Test filtering by product ID"
+      },
+      {
+        "step": 9,
+        "action": "Query Account with Orders",
+        "query": "getAccountWithOrders",
+        "note": "Test nested resolver - most complex query"
+      }
+    ]
+  },
+  
+  "sample_data": {
+    "accounts": [
+      { "name": "Siddhartha" },
+      { "name": "John Doe" },
+      { "name": "Jane Smith" }
+    ],
+    "products": [
+      {
+        "name": "iPhone 17",
+        "description": "Latest Apple Phone",
+        "price": 79999
+      },
+      {
+        "name": "MacBook Pro M3",
+        "description": "Professional laptop with M3 chip",
+        "price": 199999
+      },
+      {
+        "name": "AirPods Pro",
+        "description": "Wireless earbuds with noise cancellation",
+        "price": 24999
+      }
+    ]
+  },
+  
+  "error_scenarios": {
+    "invalid_account_id": {
+      "query": "mutation CreateOrder {\n  createOrder(\n    order: {\n      accountId: \"invalid-id\"\n      products: [{ id: \"35SxLb36a8QJugjbBSAWdRM9eQH\", quantity: 1 }]\n    }\n  ) {\n    id\n  }\n}",
+      "expected_error": "Account not found"
+    },
+    "invalid_product_id": {
+      "query": "mutation CreateOrder {\n  createOrder(\n    order: {\n      accountId: \"35Stv3CNJNcaIngE9iQ84lQY4nz\"\n      products: [{ id: \"invalid-product-id\", quantity: 1 }]\n    }\n  ) {\n    id\n  }\n}",
+      "expected_error": "Product not found"
+    }
+  },
+  
+  "performance_tests": {
+    "pagination": {
+      "description": "Test pagination with different skip/take values",
+      "queries": [
+        "products(pagination: { skip: 0, take: 5 })",
+        "products(pagination: { skip: 5, take: 5 })",
+        "products(pagination: { skip: 10, take: 10 })"
+      ]
+    },
+    "search": {
+      "description": "Test Elasticsearch search performance",
+      "queries": [
+        "products(query: \"iphone\")",
+        "products(query: \"macbook\")",
+        "products(query: \"apple\")"
+      ]
+    }
   }
+}

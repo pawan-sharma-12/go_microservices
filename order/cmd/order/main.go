@@ -84,7 +84,7 @@ func main() {
 	// -------------------------------
 	// Start gRPC server
 	// -------------------------------
-	log.Println("🚀 Order Service listening on port 8080...")
+	log.Println("🚀 Order Service listening on port 50053...")
 	s := order.NewService(r)
-	log.Fatal(order.ListenGRPC(s, cfg.AccountURL, cfg.CatalogURL, 8080))
+	log.Fatal(order.ListenGRPC(s, cfg.AccountURL, cfg.CatalogURL, 50053))
 }

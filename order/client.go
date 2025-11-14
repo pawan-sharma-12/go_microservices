@@ -6,6 +6,7 @@ import (
 
 	"github.com/pawan-sharma-12/go_microservices/order/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Client struct {
@@ -14,10 +15,17 @@ type Client struct {
 }
 
 func NewClient(url string) (*Client, error) {
-	conn, err := grpc.Dial(url, grpc.WithInsecure())
+	log.Printf("🔗 Order client connecting to: %s", url)
+	// Force direct connection, bypass any proxy
+	conn, err := grpc.Dial(url, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
+	)
 	if err != nil {
+		log.Printf("❌ Order client connection failed: %v", err)
 		return nil, err
 	}
+	log.Printf("✅ Order client connected successfully to: %s", url)
 	return &Client{
 		conn:    conn,
 		service: pb.NewOrderServiceClient(conn),

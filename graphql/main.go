@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	// "github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 
 	// "github.com/gorilla/websocket"
@@ -52,20 +52,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create gqlgen handler
-	srv := handler.New(server.ToExecutableSchema())
-
-	// Add transports
-	// srv.AddTransport(transport.Websocket{
-	// 	Upgrader: websocket.Upgrader{
-	// 		CheckOrigin: func(r *http.Request) bool {
-	// 			// Allow all connections
-	// 			return true
-	// 		},
-	// 	},
-	// })
-	srv.AddTransport(transport.POST{})
-	srv.AddTransport(transport.GET{})
+	// Create gqlgen handler with introspection enabled
+	srv := handler.NewDefaultServer(server.ToExecutableSchema())
 
 	// HTTP handlers
 	http.Handle("/graphql", srv)

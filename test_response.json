@@ -1,0 +1,252 @@
+{
+  "summary": {
+    "total_tests": 9,
+    "passed_tests": 9,
+    "failed_tests": 0,
+    "test_run_time": "4.859518708s"
+  },
+  "results": [
+    {
+      "test_name": "createProduct",
+      "description": "Create a new product in catalog",
+      "query": "mutation CreateProduct {\n  createProduct(\n    product: {\n      name: \"iPhone 17\"\n      description: \"Latest Apple Phone\"\n      price: 79999\n    }\n  ) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "response": {
+        "data": {
+          "createProduct": {
+            "description": "Latest Apple Phone",
+            "id": "35SzDvpS2tPuZFcaChncxE68KL5",
+            "name": "iPhone 17",
+            "price": 79999
+          }
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:24+05:30"
+    },
+    {
+      "test_name": "createOrder",
+      "description": "Create a new order with products",
+      "query": "mutation CreateOrder {\n  createOrder(\n    order: {\n      accountId: \"35Stv3CNJNcaIngE9iQ84lQY4nz\"\n      products: [\n        { id: \"35SxLb36a8QJugjbBSAWdRM9eQH\", quantity: 3 }\n      ]\n    }\n  ) {\n    id\n    createdAt\n    totalPrice\n  }\n}",
+      "response": {
+        "data": {
+          "createOrder": {
+            "createdAt": "2025-11-14T11:02:24.899606Z",
+            "id": "35SzDuDQQsPn0re2xZGCjfHJjBZ",
+            "totalPrice": 239997
+          }
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:24+05:30"
+    },
+    {
+      "test_name": "createAccount",
+      "description": "Create a new user account",
+      "query": "mutation CreateAccount {\n  createAccount(account: { name: \"Siddhartha\" }) {\n    id\n    name\n  }\n}",
+      "response": {
+        "data": {
+          "createAccount": {
+            "id": "35SzE4INFFhaSlZCmXQOwTBmxpG",
+            "name": "Siddhartha"
+          }
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:25+05:30"
+    },
+    {
+      "test_name": "getAllProducts",
+      "description": "Get all products with pagination",
+      "query": "query GetProducts {\n  products(pagination: { skip: 0, take: 10 }) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "response": {
+        "data": {
+          "products": [
+            {
+              "description": "Apple MacBook Pro with M2 Max chip",
+              "id": "35SQBLN1iqbmki3tejiDDwkzLEb",
+              "name": "MacBook Pro 16",
+              "price": 2499.99
+            },
+            {
+              "description": "Latest Apple Phone",
+              "id": "35StxhxpOc60H9ozwms0MYfAfZR",
+              "name": "iPhone 16",
+              "price": 79999
+            },
+            {
+              "description": "Latest Apple Phone",
+              "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+              "name": "iPhone 17",
+              "price": 79999
+            },
+            {
+              "description": "Latest Apple Phone",
+              "id": "35SzDvpS2tPuZFcaChncxE68KL5",
+              "name": "iPhone 17",
+              "price": 79999
+            }
+          ]
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:25+05:30"
+    },
+    {
+      "test_name": "searchProducts",
+      "description": "Search products by query string",
+      "query": "query SearchProducts {\n  products(\n    pagination: { skip: 0, take: 10 }\n    query: \"iphone 17\"\n  ) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "response": {
+        "data": {
+          "products": [
+            {
+              "description": "Latest Apple Phone",
+              "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+              "name": "iPhone 17",
+              "price": 79999
+            },
+            {
+              "description": "Latest Apple Phone",
+              "id": "35SzDvpS2tPuZFcaChncxE68KL5",
+              "name": "iPhone 17",
+              "price": 79999
+            },
+            {
+              "description": "Latest Apple Phone",
+              "id": "35StxhxpOc60H9ozwms0MYfAfZR",
+              "name": "iPhone 16",
+              "price": 79999
+            }
+          ]
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:26+05:30"
+    },
+    {
+      "test_name": "getProductById",
+      "description": "Get specific product by ID",
+      "query": "query GetProduct {\n  products(\n    pagination: { skip: 0, take: 10 }\n    id: \"35StxhxpOc60H9ozwms0MYfAfZR\"\n  ) {\n    id\n    name\n    description\n    price\n  }\n}",
+      "response": {
+        "data": {
+          "products": [
+            {
+              "description": "Latest Apple Phone",
+              "id": "35StxhxpOc60H9ozwms0MYfAfZR",
+              "name": "iPhone 16",
+              "price": 79999
+            }
+          ]
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:26+05:30"
+    },
+    {
+      "test_name": "getAccountWithOrders",
+      "description": "Get account with all associated orders and product details",
+      "query": "query GetAccountWithOrders {\n  accounts(pagination: { skip: 0, take: 10 }, id: \"35Stv3CNJNcaIngE9iQ84lQY4nz\") {\n    id\n    name\n    orders {\n      id\n      createdAt\n      totalPrice\n      products {\n        id\n        name\n        description\n        price\n        quantity\n      }\n    }\n  }\n}",
+      "response": {
+        "data": {
+          "accounts": [
+            {
+              "id": "35Stv3CNJNcaIngE9iQ84lQY4nz",
+              "name": "Pawan",
+              "orders": [
+                {
+                  "createdAt": "2025-11-14T10:45:34.111207Z",
+                  "id": "35SxB0jdIMsQbn1EiO4KMkNmXho",
+                  "products": [
+                    {
+                      "description": "Latest Apple Phone",
+                      "id": "35StxhxpOc60H9ozwms0MYfAfZR",
+                      "name": "iPhone 16",
+                      "price": 79999,
+                      "quantity": 2
+                    }
+                  ],
+                  "totalPrice": 159998
+                },
+                {
+                  "createdAt": "2025-11-14T10:47:22.979554Z",
+                  "id": "35SxOdWpl91WjnOuryUWf37xuBD",
+                  "products": [
+                    {
+                      "description": "Latest Apple Phone",
+                      "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+                      "name": "iPhone 17",
+                      "price": 79999,
+                      "quantity": 3
+                    }
+                  ],
+                  "totalPrice": 239997
+                },
+                {
+                  "createdAt": "2025-11-14T11:02:24.899606Z",
+                  "id": "35SzDuDQQsPn0re2xZGCjfHJjBZ",
+                  "products": [
+                    {
+                      "description": "Latest Apple Phone",
+                      "id": "35SxLb36a8QJugjbBSAWdRM9eQH",
+                      "name": "iPhone 17",
+                      "price": 79999,
+                      "quantity": 3
+                    }
+                  ],
+                  "totalPrice": 239997
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:27+05:30"
+    },
+    {
+      "test_name": "getAllAccounts",
+      "description": "Get all accounts with pagination",
+      "query": "query GetAccounts {\n  accounts(pagination: { skip: 0, take: 10 }) {\n    id\n    name\n  }\n}",
+      "response": {
+        "data": {
+          "accounts": [
+            {
+              "id": "35SzE4INFFhaSlZCmXQOwTBmxpG",
+              "name": "Siddhartha"
+            },
+            {
+              "id": "35SxIg9Gn8A3lNtefVrYUkfeWsX",
+              "name": "Siddhartha"
+            },
+            {
+              "id": "35Stv3CNJNcaIngE9iQ84lQY4nz",
+              "name": "Pawan"
+            },
+            {
+              "id": "35SMrVBTmBdn3JfGeVFaHz7FZFg",
+              "name": "Pawan Sharma"
+            }
+          ]
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:28+05:30"
+    },
+    {
+      "test_name": "getAccountById",
+      "description": "Get specific account by ID",
+      "query": "query GetAccount {\n  accounts(pagination: { skip: 0, take: 10 }, id: \"35Stv3CNJNcaIngE9iQ84lQY4nz\") {\n    id\n    name\n  }\n}",
+      "response": {
+        "data": {
+          "accounts": [
+            {
+              "id": "35Stv3CNJNcaIngE9iQ84lQY4nz",
+              "name": "Pawan"
+            }
+          ]
+        }
+      },
+      "status": "PASSED",
+      "timestamp": "2025-11-14T16:32:28+05:30"
+    }
+  ]
+}
