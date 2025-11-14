@@ -44,9 +44,6 @@ github.com/joho/godotenv
 # github.com/josharian/intern v1.0.0
 ## explicit; go 1.5
 github.com/josharian/intern
-# github.com/kelseyhightower/envconfig v1.4.0
-## explicit
-github.com/kelseyhightower/envconfig
 # github.com/lib/pq v1.10.9
 ## explicit; go 1.13
 github.com/lib/pq
