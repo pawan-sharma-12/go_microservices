@@ -17,37 +17,39 @@ type Server struct {
 	orderClient   *order.Client
 }
 func NewGraphQlServer(accountUrl, catalogUrl, orderUrl string) (*Server, error) {
-	// Implementation goes here
-	accountClient, err := account.NewClient(accountUrl)
-	if err != nil {
-		accountClient.Close()
-		return nil, err
-	}
-	catalogClient, err := catalog.NewClient(catalogUrl)
-	if err != nil {
-		catalogClient.Close()
-		return nil, err
-	}
-	orderClient, err := order.NewClient(orderUrl)
-	if err != nil {
-		orderClient.Close()
-		return nil, err
-	}
-	return &Server{
-		accountClient: accountClient,
-		catalogClient: catalogClient,
-		orderClient:   orderClient,
-	}, nil
+    accountClient, err := account.NewClient(accountUrl)
+    if err != nil {
+        return nil, err
+    }
 
+    catalogClient, err := catalog.NewClient(catalogUrl)
+    if err != nil {
+        accountClient.Close() // close already created client
+        return nil, err
+    }
+
+    orderClient, err := order.NewClient(orderUrl)
+    if err != nil {
+        accountClient.Close()
+        catalogClient.Close()
+        return nil, err
+    }
+
+    return &Server{
+        accountClient: accountClient,
+        catalogClient: catalogClient,
+        orderClient:   orderClient,
+    }, nil
 }
-func (s *Server) Mutataion() MutationResolver {
+
+func (s *Server) Mutation() MutationResolver {
 	return &mutationResolver{
-		Server: s,
+		server: s,
 	}
 }
 func (s *Server) Query() QueryResolver {
 	return &queryResolver{
-		Server: s,
+		server: s,
 	}
 }
 // Define the accountResolver type and implement the AccountResolver interface
@@ -57,7 +59,7 @@ func (s *Server) Query() QueryResolver {
 
 func (s *Server) Account() AccountResolver {
 	return &accountResolver{
-		Server: s,
+		server: s,
 	}
 }
 

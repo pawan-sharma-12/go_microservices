@@ -11,7 +11,6 @@ import (
 	"errors"
 	"log"
 	"time"
-
 	"github.com/pawan-sharma-12/go_microservices/order"
 )
 
@@ -21,11 +20,11 @@ var (
 type mutationResolver struct{ 
 	server *Server
 }
-func (r *mutationResolver) createAccount(ctx context.Context, in AccountInput) (*Account, error) {
+func (r *mutationResolver) CreateAccount(ctx context.Context, in AccountInput) (*Account, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-	a, err := r.server.accountClient.PostAccount(ctx, in.Name, in.Email)
+	a, err := r.server.accountClient.PostAccount(ctx, in.Name)
 	if err != nil{
 		log.Println(err)
 		return  nil, err
@@ -36,7 +35,7 @@ func (r *mutationResolver) createAccount(ctx context.Context, in AccountInput) (
 	}, nil
 }
 
-func (r *mutationResolver) createProduct(ctx context.Context, in ProductInput) (*Product, error) {
+func (r *mutationResolver) CreateProduct(ctx context.Context, in ProductInput) (*Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 	p, err := r.server.catalogClient.PostProduct(ctx, in.Name, in.Description, in.Price)
@@ -51,17 +50,17 @@ func (r *mutationResolver) createProduct(ctx context.Context, in ProductInput) (
 		Price : p.Price,
 	}, nil
 }
-func (r *mutationResolver) createOrder(ctx context.Context, in OrderInput) (*Order, error) {
+func (r *mutationResolver) CreateOrder(ctx context.Context, in OrderInput) (*Order, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-	var products []Order.OrderedProduct 
+	var products []order.OrderProduct 
 	for _, p := range in.Products{
 		if p.Quantity <= 0{
 			return  nil, ErrInvalidParameter
 		}
-		products = append(products, Order.OrderProduct{
+		products = append(products, order.OrderProduct{
 			ID : p.ID, 
-			Quantity : p.Quantity,
+			Quantity : uint64(p.Quantity),
 		})
 	}
 	o, err := r.server.orderClient.PostOrder(ctx, in.AccountID, products)

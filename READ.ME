@@ -1,3 +1,6 @@
 1.Generate the data <file>.proto 
 protoc --go_out=./pb --go-grpc_out=./pb <file>.proto
 2.sudo rm -rf <dir with content>
+
+Connect to POSTGRES :
+docker exec -it order_db psql -U postgres -d order_db

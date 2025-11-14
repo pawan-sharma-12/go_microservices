@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
-	"time"
 	"os"
+	"strconv"
+	"time"
+
 	"github.com/avast/retry-go"
 	"github.com/joho/godotenv"
 	"github.com/pawan-sharma-12/go_microservices/account"
@@ -12,9 +14,15 @@ type Config struct{
 	DatabaseURL string `envconfig:"DATABASE_URL,required"`
 }
 func main(){
-	_ = godotenv.Load("../../../.env")
+
+	env := os.Getenv("GO_ENV")
+	if env == "" {
+		env = "local"
+	}
+	_ = godotenv.Load(".env." + env)
+
 	cfg := Config{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
+		DatabaseURL: os.Getenv("ACCOUNT_DATABASE_URL"),
 	}
 	if cfg.DatabaseURL == "" {
 		log.Fatal("DATABASE_URL not set")
@@ -38,7 +46,18 @@ func main(){
 		log.Fatalf("💥 Could not establish database connection after retries: %v", err)
 	}
 	defer r.Close()
-	log.Println("Server is Listening at port 8080...")
+	
+	portStr := os.Getenv("ACCOUNT_SERVICE_PORT")
+	if portStr == "" {
+		portStr = "50051" // default for local dev
+	}
+	portInt, err := strconv.Atoi(portStr)
+	if err != nil {
+		log.Fatalf("Invalid port number: %v", err)
+	}
+	
+	log.Println("Account Service Listening at port", portInt)
 	s := account.NewAccountService(r)
-	log.Fatal(account.ListenAndServeGRPC(s, 8080 ))
+	log.Fatal(account.ListenAndServeGRPC(s, portInt))
+	
 }

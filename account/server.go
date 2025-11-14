@@ -36,7 +36,7 @@ func ListenAndServeGRPC(service Service, port int) error {
 }
 //POST /accounts
 func (s *grpcServer) PostAccount(ctx context.Context, req *pb.PostAccountRequest) (*pb.PostAccountResponse, error) {
-	account, err := s.service.PostAccount(ctx, req.Name, req.Email)
+	account, err := s.service.PostAccount(ctx, req.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,6 @@ func (s *grpcServer) PostAccount(ctx context.Context, req *pb.PostAccountRequest
 		Account : &pb.Account{
 			Id:    account.ID,
 			Name:  account.Name,
-			Email: account.Email,
 		}, 
 	}, nil
 }
@@ -59,7 +58,6 @@ func (s *grpcServer) GetAccount(ctx context.Context, req *pb.GetAccountRequest)(
 		Account : &pb.Account{
 			Id:    account.ID,
 			Name:  account.Name,
-			Email: account.Email,
 		},
 
 	}, nil
@@ -76,7 +74,6 @@ func (s * grpcServer) GetAccounts(ctx context.Context, req *pb.GetAccountsReques
 		pbAccounts = append(pbAccounts, &pb.Account{
 			Id:    account.ID,
 			Name:  account.Name,
-			Email: account.Email,
 		})
 	}
 	return &pb.GetAccountsResponse{

@@ -6,7 +6,7 @@ import
 )
 
 type Service interface {
-	PostAccount(ctx context.Context, name string, email string) (*Account, error)
+	PostAccount(ctx context.Context, name string) (*Account, error)
 	GetAccountByID  (ctx context.Context, id string) (*Account, error)
 	GetAccounts (ctx context.Context, skip uint64, take uint64) ([]Account, error)
 
@@ -16,7 +16,6 @@ type Service interface {
 type Account struct {
 	ID	string `json:"id"`
 	Name	string `json:"name"`
-	Email	string `json:"email"`
 }
 type accountService struct {
 	repo Repository
@@ -28,11 +27,10 @@ func NewAccountService(repo Repository) Service {
 	}
 }
 
-func (s *accountService) PostAccount(ctx context.Context, name string, email string) (*Account, error) {
+func (s *accountService) PostAccount(ctx context.Context, name string) (*Account, error) {
 	account := Account{
 		ID:    ksuid.New().String(),
 		Name:  name,
-		Email: email,
 	}
 	if err := s.repo.PutAccount(ctx, account); err != nil {
 		return nil, err

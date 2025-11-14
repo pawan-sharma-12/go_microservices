@@ -22,9 +22,9 @@ func (r *accountResolver) Orders(ctx context.Context, obj *Account) ([]*Order, e
 	}
 	var orders []*Order
 	for _, o := range orderList {
-		var products []*OrderedProduct
+		var products []*OrderProduct
 		for _, p := range o.Products{
-			products = append(products, &OrderedProduct{
+			products = append(products, &OrderProduct{
 				ID: p.ID,
 				Name: p.Name,
 				Description: p.Description,

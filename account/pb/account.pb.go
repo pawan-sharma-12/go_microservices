@@ -4,7 +4,7 @@
 // 	protoc        v6.33.0
 // source: account.proto
 
-package pb
+package __
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -25,7 +25,6 @@ type Account struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,17 +73,9 @@ func (x *Account) GetName() string {
 	return ""
 }
 
-func (x *Account) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
 type PostAccountRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -122,13 +113,6 @@ func (*PostAccountRequest) Descriptor() ([]byte, []int) {
 func (x *PostAccountRequest) GetName() string {
 	if x != nil {
 		return x.Name
-	}
-	return ""
-}
-
-func (x *PostAccountRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
 	}
 	return ""
 }
@@ -365,14 +349,12 @@ var File_account_proto protoreflect.FileDescriptor
 
 const file_account_proto_rawDesc = "" +
 	"\n" +
-	"\raccount.proto\x12\x02pb\"C\n" +
+	"\raccount.proto\x12\x02pb\"-\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\">\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"(\n" +
 	"\x12PostAccountRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"<\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"<\n" +
 	"\x13PostAccountResponse\x12%\n" +
 	"\aaccount\x18\x01 \x01(\v2\v.pb.AccountR\aaccount\"#\n" +
 	"\x11GetAccountRequest\x12\x0e\n" +
@@ -388,7 +370,7 @@ const file_account_proto_rawDesc = "" +
 	"\vPostAccount\x12\x16.pb.PostAccountRequest\x1a\x17.pb.PostAccountResponse\x12;\n" +
 	"\n" +
 	"GetAccount\x12\x15.pb.GetAccountRequest\x1a\x16.pb.GetAccountResponse\x12>\n" +
-	"\vGetAccounts\x12\x16.pb.GetAccountsRequest\x1a\x17.pb.GetAccountsResponseB7Z5github.com/pawansharma/go_microservices/account/pb;pbb\x06proto3"
+	"\vGetAccounts\x12\x16.pb.GetAccountsRequest\x1a\x17.pb.GetAccountsResponseB\x03Z\x01.b\x06proto3"
 
 var (
 	file_account_proto_rawDescOnce sync.Once

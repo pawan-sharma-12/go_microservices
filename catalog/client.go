@@ -2,8 +2,10 @@ package catalog
 
 import (
 	"context"
-	"google.golang.org/grpc"
+	"log"
+
 	"github.com/pawan-sharma-12/go_microservices/catalog/pb"
+	"google.golang.org/grpc"
 )
 type Client struct {
 	conn *grpc.ClientConn
@@ -61,6 +63,7 @@ func (c *Client) GetProducts(ctx context.Context, skip uint64, take uint64, ids 
 		Query: query,
 	})
 	if err != nil {
+		log.Println("client.go GetProducts error : ", err)
 		return nil, err
 	}
 	var products []Product

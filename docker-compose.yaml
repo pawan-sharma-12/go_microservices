@@ -1,12 +1,10 @@
-version: "3.9"
-
 services:
   # -------------------
   # Account Microservice
   # -------------------
   account:
     build:
-      context: .
+      context: ./
       dockerfile: account/app.dockerfile
     container_name: account_service
     depends_on:
@@ -24,7 +22,7 @@ services:
   # -------------------
   catalog:
     build:
-      context: .
+      context: ./
       dockerfile: catalog/app.dockerfile
     container_name: catalog_service
     depends_on:
@@ -42,7 +40,7 @@ services:
   # -------------------
   order:
     build:
-      context: .
+      context: ./
       dockerfile: order/app.dockerfile
     container_name: order_service
     depends_on:
@@ -59,11 +57,11 @@ services:
       - micro_net
 
   # -------------------
-  # GraphQL Gateway (optional)
+  # GraphQL Gateway
   # -------------------
   graphql:
     build:
-      context: .
+      context: ./
       dockerfile: graphql/app.dockerfile
     container_name: graphql_gateway
     depends_on:

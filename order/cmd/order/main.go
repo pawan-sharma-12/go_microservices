@@ -11,26 +11,42 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string `envconfig:"DATABASE_URL,required"`
-	AccountURL  string `envconfig:"ACCOUNT_SERVICE_URL,required"`
-	CatalogURL  string `envconfig:"CATALOG_SERVICE_URL,required"`
+	OrderDatabaseURL string `envconfig:"ORDER_DATABASE_URL,required"`
+	AccountURL       string `envconfig:"ACCOUNT_SERVICE_URL,required"`
+	CatalogURL       string `envconfig:"CATALOG_SERVICE_URL,required"`
 }
 
 func main() {
-	// Load environment variables from .env file
-	if err := godotenv.Load("../../../.env"); err != nil {
-		log.Println("⚠️ Warning: .env file not found, relying on system env vars")
+
+	// -------------------------------
+	// Load environment-specific config
+	// -------------------------------
+	env := os.Getenv("GO_ENV")
+	if env == "" {
+		env = "local"
 	}
 
+	envFile := ".env." + env
+	if err := godotenv.Load(envFile); err != nil {
+		log.Printf("⚠️ Warning: %s not found, falling back to system env vars", envFile)
+	} else {
+		log.Printf("📦 Loaded environment config from %s", envFile)
+	}
+
+	// -------------------------------
+	// Read configuration
+	// -------------------------------
 	cfg := Config{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		AccountURL:  os.Getenv("ACCOUNT_SERVICE_URL"),
-		CatalogURL:  os.Getenv("CATALOG_SERVICE_URL"),
+		OrderDatabaseURL: os.Getenv("ORDER_DATABASE_URL"),
+		AccountURL:       os.Getenv("ACCOUNT_SERVICE_URL"),
+		CatalogURL:       os.Getenv("CATALOG_SERVICE_URL"),
 	}
 
-	// Validate configuration
-	if cfg.DatabaseURL == "" {
-		log.Fatal("❌ DATABASE_URL not set")
+	// -------------------------------
+	// Validations
+	// -------------------------------
+	if cfg.OrderDatabaseURL == "" {
+		log.Fatal("❌ ORDER_DATABASE_URL not set")
 	}
 	if cfg.AccountURL == "" {
 		log.Fatal("❌ ACCOUNT_SERVICE_URL not set")
@@ -39,31 +55,36 @@ func main() {
 		log.Fatal("❌ CATALOG_SERVICE_URL not set")
 	}
 
-	log.Println("✅ Using Database URL:", cfg.DatabaseURL)
-	log.Println("✅ Using Account Service URL:", cfg.AccountURL)
-	log.Println("✅ Using Catalog Service URL:", cfg.CatalogURL)
+	log.Println("🔗 ORDER_DATABASE_URL:", cfg.OrderDatabaseURL)
+	log.Println("🔗 ACCOUNT_SERVICE_URL:", cfg.AccountURL)
+	log.Println("🔗 CATALOG_SERVICE_URL:", cfg.CatalogURL)
 
+	// -------------------------------
 	// Retry DB connection
+	// -------------------------------
 	var r order.Repository
 	err := retry.Do(
 		func() error {
 			var err error
-			r, err = order.NewPostgresRepository(cfg.DatabaseURL)
+			r, err = order.NewPostgresRepository(cfg.OrderDatabaseURL)
 			if err != nil {
-				log.Printf("❌ Attempt to connect to database failed: %v", err)
+				log.Printf("❌ DB connection failed: %v", err)
 			}
 			return err
 		},
 		retry.Delay(5*time.Second),
 		retry.Attempts(3),
 	)
+
 	if err != nil {
-		log.Fatalf("💥 Could not establish database connection after retries: %v", err)
+		log.Fatalf("💥 Could not connect to Order DB after retries: %v", err)
 	}
 	defer r.Close()
 
-	// Start the gRPC server
-	log.Println("🚀 Order Server is Listening at port 8080...")
+	// -------------------------------
+	// Start gRPC server
+	// -------------------------------
+	log.Println("🚀 Order Service listening on port 8080...")
 	s := order.NewService(r)
 	log.Fatal(order.ListenGRPC(s, cfg.AccountURL, cfg.CatalogURL, 8080))
 }

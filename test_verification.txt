@@ -1,0 +1,109 @@
+Graphql Api Manual
+
+GraphQL API Manual - End-to-End Verification
+
+=============================== BASE URL: http://localhost:8080/graphql
+
+===============================
+
+Query: Get Accounts (Paginated)
+
+query { accounts(pagination: { skip: 0, take: 10 }) { id name orders { id createdAt totalPrice } } }
+
+Notes:
+
+Make sure the accounts table in account_db has data.
+
+skip and take are required.
+
+Optional: pass id to get a specific account.
+
+Expected Response (example): { "data": { "accounts": [ { "id": "1", "name": "John Doe", "orders": [] } ] } }
+
+=============================== 2. Mutation: Create Account
+
+mutation { createAccount(account: { name: "Alice" }) { id name } }
+
+Notes:
+
+Verifies that account_service is working.
+
+Check account_db after creation.
+
+Expected Response: { "data": { "createAccount": { "id": "2", "name": "Alice" } } }
+
+=============================== 3. Query: Get Products (Paginated)
+
+query { products(pagination: { skip: 0, take: 10 }) { id name description price } }
+
+Notes:
+
+Make sure catalog_db has data.
+
+Optional: pass id to fetch a specific product.
+
+Expected Response: { "data": { "products": [ { "id": "1", "name": "Laptop", "description": "Gaming Laptop", "price": 1200.0 } ] } }
+
+=============================== 4. Mutation: Create Product
+
+mutation { createProduct(product: { name: "Mouse", description: "Wireless Mouse", price: 25.5 }) { id name description price } }
+
+Notes:
+
+Verifies catalog_service.
+
+Check catalog_db after creation.
+
+Expected Response: { "data": { "createProduct": { "id": "2", "name": "Mouse", "description": "Wireless Mouse", "price": 25.5 } } }
+
+=============================== 5. Mutation: Create Order
+
+mutation { createOrder(order: { accountId: "1", products: [ { id: "1", quantity: 2 }, { id: "2", quantity: 1 } ] }) { id createdAt totalPrice } }
+
+Notes:
+
+Verifies order_service.
+
+Check order_db after creation.
+
+Ensure accountId exists and product IDs exist.
+
+Expected Response: { "data": { "createOrder": { "id": "1", "createdAt": "2025-11-13T12:34:56Z", "totalPrice": 1245.5 } } }
+
+=============================== Manual Verification Steps:
+
+Ensure all services are running via docker ps.
+
+Open http://localhost:8080/playground.
+
+Run the queries/mutations above in order:
+
+Start with createAccount and createProduct.
+
+Then run accounts and products queries.
+
+Finally, run createOrder.
+
+Verify responses match expected outputs.
+
+Optionally, connect to respective databases to verify data insertion:
+
+docker exec -it account_db psql -U postgres -d account_db
+
+docker exec -it catalog_db psql -U postgres -d catalog_db
+
+docker exec -it order_db psql -U postgres -d order_db
+
+Repeat queries to ensure pagination works (skip and take).
+
+=============================== Notes:
+
+Always provide required fields (PaginationInput, AccountInput, ProductInput, OrderInput).
+
+Check for proper IDs when linking orders to accounts/products.
+
+Use Ctrl+Enter in Playground to run each query/mutation.
+
+Use GraphiQL or Postman if needed for testing.
+
+=============================== End of Document.

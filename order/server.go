@@ -12,9 +12,10 @@ import (
 	"github.com/pawan-sharma-12/go_microservices/order/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// grpcServer implements the gRPC service
+// grpcServer implements pb.OrderServiceServer
 type grpcServer struct {
 	service       Service
 	accountClient *account.Client
@@ -28,7 +29,6 @@ func ListenGRPC(s Service, accountURL, catalogURL string, port int) error {
 	if err != nil {
 		return err
 	}
-
 	catalogClient, err := catalog.NewClient(catalogURL)
 	if err != nil {
 		accountClient.Close()
@@ -42,143 +42,118 @@ func ListenGRPC(s Service, accountURL, catalogURL string, port int) error {
 		return err
 	}
 
-	serv := grpc.NewServer()
-	pb.RegisterOrderServiceServer(serv, &grpcServer{
+	grpcSrv := grpc.NewServer()
+	pb.RegisterOrderServiceServer(grpcSrv, &grpcServer{
 		service:       s,
 		accountClient: accountClient,
 		catalogClient: catalogClient,
-		UnimplementedOrderServiceServer : pb.UnimplementedOrderServiceServer{},
 	})
-	reflection.Register(serv)
+	reflection.Register(grpcSrv)
+
 	log.Printf("🚀 gRPC Order service running on port %d", port)
-	return serv.Serve(lis)
+	return grpcSrv.Serve(lis)
 }
 
-// PostOrder creates a new order
+// PostOrder handles creating a new order
 func (s *grpcServer) PostOrder(ctx context.Context, req *pb.PostOrderRequest) (*pb.PostOrderResponse, error) {
+	// Convert request products to internal OrderProduct
+	products := convertRequestProtoToOrderProducts(req.Products)
+
+	// Validate account exists
 	_, err := s.accountClient.GetAccount(ctx, req.AccountId)
 	if err != nil {
 		log.Println("❌ Error fetching account:", err)
 		return nil, err
 	}
 
+	// Fetch product details from catalog
 	productIDs := []string{}
-	for _, p := range req.Products {
-		productIDs = append(productIDs, p.ProductId)
+	for _, p := range products {
+		productIDs = append(productIDs, p.ID)
 	}
 
-	orderedProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
+	catalogProducts, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
 	if err != nil {
 		log.Println("❌ Error fetching products:", err)
 		return nil, err
 	}
 
-	products := []OrderProduct{}
-	for _, p := range orderedProducts {
-		product := OrderProduct{
-			ID:          p.ID,
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
-			Quantity:    0,
-		}
-
-		for _, rp := range req.Products {
-			if rp.ProductId == p.ID {
-				product.Quantity = rp.Quantity
+	// Merge quantities with catalog details
+	for i := range products {
+		for _, cp := range catalogProducts {
+			if products[i].ID == cp.ID {
+				products[i].Name = cp.Name
+				products[i].Description = cp.Description
+				products[i].Price = cp.Price
 				break
 			}
 		}
-
-		if product.Quantity > 0 {
-			products = append(products, product)
-		}
 	}
 
+	// Create order
 	order, err := s.service.PostOrder(ctx, req.AccountId, products)
 	if err != nil {
 		log.Println("❌ Error posting order:", err)
 		return nil, errors.New("failed to post order")
 	}
 
-	createdAt, _ := order.CreatedAt.MarshalBinary()
-	orderProto := &pb.Order{
-		Id:         order.ID,
-		AccountId:  order.AccountID,
-		TotalPrice: order.TotalPrice,
-		CreatedAt:  createdAt,
-		Products:   []*pb.Order_OrderProduct{},
-	}
-
-	for _, p := range order.Products {
-		orderProto.Products = append(orderProto.Products, &pb.Order_OrderProduct{
-			Id:          p.ID,
-			Name:        p.Name,
-			Description: p.Description,
-			Price:       p.Price,
-			Quantity:    p.Quantity,
-		})
-	}
-
-	return &pb.PostOrderResponse{Order: orderProto}, nil
+	// Convert to protobuf response
+	return &pb.PostOrderResponse{
+		Order: &pb.Order{
+			Id:         order.ID,
+			AccountId:  order.AccountID,
+			TotalPrice: order.TotalPrice,
+			CreatedAt:  timestamppb.New(order.CreatedAt),
+			Products:   convertOrderProductsToProto(order.Products),
+		},
+	}, nil
 }
 
-// GetOrdersForAccount returns all orders for an account
+// GetOrdersForAccount fetches all orders for an account
 func (s *grpcServer) GetOrdersForAccount(ctx context.Context, req *pb.GetOrderForAccountRequest) (*pb.GetOrderForAccountResponse, error) {
-	accountOrders, err := s.service.GetOrdersForAccount(ctx, req.AccountId)
+	orders, err := s.service.GetOrdersForAccount(ctx, req.AccountId)
 	if err != nil {
-		log.Println("❌ Could not find orders for account:", err)
+		log.Println("❌ Error fetching orders:", err)
 		return nil, err
 	}
 
-	productIdMap := map[string]bool{}
-	for _, o := range accountOrders {
-		for _, p := range o.Products {
-			productIdMap[p.ID] = true
-		}
-	}
-
-	productIDs := []string{}
-	for id := range productIdMap {
-		productIDs = append(productIDs, id)
-	}
-
-	products, err := s.catalogClient.GetProducts(ctx, 0, 0, productIDs, "")
-	if err != nil {
-		log.Println("❌ Error getting product details:", err)
-	}
-
-	orders := []*pb.Order{}
-	for _, o := range accountOrders {
-		createdAt, _ := o.CreatedAt.MarshalBinary()
-		op := &pb.Order{
+	var protoOrders []*pb.Order
+	for _, o := range orders {
+		protoOrders = append(protoOrders, &pb.Order{
 			Id:         o.ID,
 			AccountId:  o.AccountID,
 			TotalPrice: o.TotalPrice,
-			CreatedAt:  createdAt,
-			Products:   []*pb.Order_OrderProduct{},
-		}
-
-		for _, product := range o.Products {
-			for _, p := range products {
-				if p.ID == product.ID {
-					product.Name = p.Name
-					product.Description = p.Description
-					product.Price = p.Price
-					break
-				}
-			}
-
-			op.Products = append(op.Products, &pb.Order_OrderProduct{
-				Id:          product.ID,
-				Name:        product.Name,
-				Description: product.Description,
-				Price:       product.Price,
-				Quantity:    product.Quantity,
-			})
-		}
-		orders = append(orders, op)
+			CreatedAt:  timestamppb.New(o.CreatedAt),
+			Products:   convertOrderProductsToProto(o.Products),
+		})
 	}
 
-	return &pb.GetOrderForAccountResponse{Orders: orders}, nil
+	return &pb.GetOrderForAccountResponse{Orders: protoOrders}, nil
+}
+
+// Helper: convert request products to internal OrderProduct
+func convertRequestProtoToOrderProducts(protoProducts []*pb.PostOrderRequest_OrderProduct) []OrderProduct {
+	products := make([]OrderProduct, len(protoProducts))
+	for i, p := range protoProducts {
+		products[i] = OrderProduct{
+			ID:       p.ProductId,
+			Quantity: p.Quantity,
+		}
+	}
+	return products
+}
+
+// Helper: convert internal OrderProduct to protobuf Order_OrderProduct
+func convertOrderProductsToProto(products []OrderProduct) []*pb.Order_OrderProduct {
+	protoProducts := make([]*pb.Order_OrderProduct, len(products))
+	for i, p := range products {
+		protoProducts[i] = &pb.Order_OrderProduct{
+			Id:          p.ID,
+			Name:        p.Name,
+			Description: p.Description,
+			Quantity:    p.Quantity,
+			Price:       p.Price,
+		}
+	}
+	return protoProducts
 }

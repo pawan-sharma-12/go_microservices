@@ -9,6 +9,7 @@ package pb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -24,7 +25,7 @@ const (
 type Order struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	CreatedAt     []byte                 `protobuf:"bytes,2,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	AccountId     string                 `protobuf:"bytes,3,opt,name=accountId,proto3" json:"accountId,omitempty"`
 	TotalPrice    float64                `protobuf:"fixed64,4,opt,name=totalPrice,proto3" json:"totalPrice,omitempty"`
 	Products      []*Order_OrderProduct  `protobuf:"bytes,5,rep,name=Products,proto3" json:"Products,omitempty"`
@@ -69,7 +70,7 @@ func (x *Order) GetId() string {
 	return ""
 }
 
-func (x *Order) GetCreatedAt() []byte {
+func (x *Order) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
 	}
@@ -151,7 +152,7 @@ func (x *PostOrderRequest) GetProducts() []*PostOrderRequest_OrderProduct {
 
 type PostOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Order         *Order                 `protobuf:"bytes,1,opt,name=order,proto3" json:"order,omitempty"`
+	Order         *Order                 `protobuf:"bytes,1,opt,name=Order,proto3" json:"Order,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -501,10 +502,11 @@ var File_order_proto protoreflect.FileDescriptor
 
 const file_order_proto_rawDesc = "" +
 	"\n" +
-	"\vorder.proto\x12\x05order\"\xb3\x02\n" +
+	"\vorder.proto\x12\x05order\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd0\x02\n" +
 	"\x05Order\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1c\n" +
-	"\tcreatedAt\x18\x02 \x01(\fR\tcreatedAt\x12\x1c\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x129\n" +
+	"\n" +
+	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1c\n" +
 	"\taccountId\x18\x03 \x01(\tR\taccountId\x12\x1e\n" +
 	"\n" +
 	"totalPrice\x18\x04 \x01(\x01R\n" +
@@ -523,7 +525,7 @@ const file_order_proto_rawDesc = "" +
 	"\tproductId\x18\x02 \x01(\tR\tproductId\x12\x1a\n" +
 	"\bquantity\x18\x03 \x01(\x04R\bquantity\"7\n" +
 	"\x11PostOrderResponse\x12\"\n" +
-	"\x05order\x18\x01 \x01(\v2\f.order.OrderR\x05order\"!\n" +
+	"\x05Order\x18\x01 \x01(\v2\f.order.OrderR\x05Order\"!\n" +
 	"\x0fGetOrderRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"6\n" +
 	"\x10GetOrderResponse\x12\"\n" +
@@ -535,7 +537,7 @@ const file_order_proto_rawDesc = "" +
 	"\fOrderService\x12>\n" +
 	"\tPostOrder\x12\x17.order.PostOrderRequest\x1a\x18.order.PostOrderResponse\x12;\n" +
 	"\bGetOrder\x12\x16.order.GetOrderRequest\x1a\x17.order.GetOrderResponse\x12Y\n" +
-	"\x12GetOrderForAccount\x12 .order.GetOrderForAccountRequest\x1a!.order.GetOrderForAccountResponseB\x06Z\x04./pbb\x06proto3"
+	"\x12GetOrderForAccount\x12 .order.GetOrderForAccountRequest\x1a!.order.GetOrderForAccountResponseB\x03Z\x01.b\x06proto3"
 
 var (
 	file_order_proto_rawDescOnce sync.Once
@@ -560,24 +562,26 @@ var file_order_proto_goTypes = []any{
 	(*GetOrderForAccountResponse)(nil),    // 6: order.GetOrderForAccountResponse
 	(*Order_OrderProduct)(nil),            // 7: order.Order.OrderProduct
 	(*PostOrderRequest_OrderProduct)(nil), // 8: order.PostOrderRequest.OrderProduct
+	(*timestamppb.Timestamp)(nil),         // 9: google.protobuf.Timestamp
 }
 var file_order_proto_depIdxs = []int32{
-	7, // 0: order.Order.Products:type_name -> order.Order.OrderProduct
-	8, // 1: order.PostOrderRequest.Products:type_name -> order.PostOrderRequest.OrderProduct
-	0, // 2: order.PostOrderResponse.order:type_name -> order.Order
-	0, // 3: order.GetOrderResponse.order:type_name -> order.Order
-	0, // 4: order.GetOrderForAccountResponse.orders:type_name -> order.Order
-	1, // 5: order.OrderService.PostOrder:input_type -> order.PostOrderRequest
-	3, // 6: order.OrderService.GetOrder:input_type -> order.GetOrderRequest
-	5, // 7: order.OrderService.GetOrderForAccount:input_type -> order.GetOrderForAccountRequest
-	2, // 8: order.OrderService.PostOrder:output_type -> order.PostOrderResponse
-	4, // 9: order.OrderService.GetOrder:output_type -> order.GetOrderResponse
-	6, // 10: order.OrderService.GetOrderForAccount:output_type -> order.GetOrderForAccountResponse
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	9, // 0: order.Order.created_at:type_name -> google.protobuf.Timestamp
+	7, // 1: order.Order.Products:type_name -> order.Order.OrderProduct
+	8, // 2: order.PostOrderRequest.Products:type_name -> order.PostOrderRequest.OrderProduct
+	0, // 3: order.PostOrderResponse.Order:type_name -> order.Order
+	0, // 4: order.GetOrderResponse.order:type_name -> order.Order
+	0, // 5: order.GetOrderForAccountResponse.orders:type_name -> order.Order
+	1, // 6: order.OrderService.PostOrder:input_type -> order.PostOrderRequest
+	3, // 7: order.OrderService.GetOrder:input_type -> order.GetOrderRequest
+	5, // 8: order.OrderService.GetOrderForAccount:input_type -> order.GetOrderForAccountRequest
+	2, // 9: order.OrderService.PostOrder:output_type -> order.PostOrderResponse
+	4, // 10: order.OrderService.GetOrder:output_type -> order.GetOrderResponse
+	6, // 11: order.OrderService.GetOrderForAccount:output_type -> order.GetOrderForAccountResponse
+	9, // [9:12] is the sub-list for method output_type
+	6, // [6:9] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_order_proto_init() }

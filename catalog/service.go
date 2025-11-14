@@ -1,7 +1,10 @@
 package catalog
+
 import (
- context "context"
- "github.com/segmentio/ksuid"
+	context "context"
+	"log"
+
+	"github.com/segmentio/ksuid"
 )
 type Product struct {
 	ID          string `json:"id"`
@@ -36,6 +39,7 @@ func (s *catalogService) PostProduct(ctx context.Context, name string, descripti
 		Price:       price,
 	}
 	if err := s.repo.PutProduct(ctx, product); err != nil {
+		log.Println("Error with PutProduct : ",err)
 		return nil, err
 	}
 	return &product, nil

@@ -1,7 +1,7 @@
 syntax = "proto3";
 package order;
-option go_package = "./pb";
-
+option go_package = ".";
+import "google/protobuf/timestamp.proto";
 message Order {
     message OrderProduct {
         string id = 1;
@@ -11,7 +11,7 @@ message Order {
         uint64 quantity = 5;
     }
     string id = 1;
-    bytes createdAt = 2;
+    google.protobuf.Timestamp created_at = 2;
     string accountId = 3;
     double totalPrice = 4;
     repeated OrderProduct Products = 5;

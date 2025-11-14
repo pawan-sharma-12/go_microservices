@@ -1,43 +1,25 @@
-# ----------------------
-# Stage 1: Build the Go binary
-# ----------------------
-    FROM golang:1.21-alpine AS builder
+# ---------- Stage 1: Build ----------
+FROM golang:1.25-alpine AS builder
 
-    # Install necessary build tools
-    RUN apk --no-cache add gcc g++ make ca-certificates git
-    
-    # Set working directory
-    WORKDIR /go/src/github.com/pawan-sharma-12/go_microservices
-    
-    # Copy Go modules
-    COPY go.mod go.sum ./
-    
-    # Copy vendor directory if using vendoring
-    COPY vendor vendor
-    
-    # Copy account microservice code
-    COPY account account
-    
-    # Build the binary (as you requested)
-    RUN GO111MODULE=on go build -mod vendor -o /go/bin/app ./account/cmd/account
-    
-    # ----------------------
-    # Stage 2: Minimal runtime image
-    # ----------------------
-    FROM alpine:latest
-    
-    # Install certificates for HTTPS if needed
-    RUN apk --no-cache add ca-certificates
-    
-    # Set working directory
-    WORKDIR /usr/bin
-    
-    # Copy the built binary
-    COPY --from=builder /go/bin/app .
-    
-    # Expose the service port
-    EXPOSE 8080
-    
-    # Run the microservice
-    CMD ["app"]
-    
+RUN apk add --no-cache gcc g++ make ca-certificates git
+
+WORKDIR /go/src/github.com/pawan-sharma-12/go_microservices
+
+COPY go.mod go.sum ./
+COPY vendor vendor
+COPY account account
+
+RUN GO111MODULE=on go build -mod=vendor -o /go/bin/account ./account/cmd/account
+
+# ---------- Stage 2: Run ----------
+FROM alpine:3.18
+
+RUN apk add --no-cache ca-certificates
+
+WORKDIR /app
+
+COPY --from=builder /go/bin/account .
+
+EXPOSE 8080
+
+CMD ["./account"]

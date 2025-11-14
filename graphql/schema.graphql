@@ -1,56 +1,67 @@
-scalar Time 
+scalar Time
 
-type Account{
-    id: String!
-    name: String!
-    orders: [Order!]!
-}
-type Product{
-    id: String!
-    name: String!
-    price: Float!
-    description: String!
-}
-type Order{
-    id: String!
-    createdAt : Time!
-    totalPrice : Float!
-    products : [OrderedProduct!]!
-}
-type OrderedProduct{
-    id: String!
-    name: String!
-    description: String!
-    price: Float!
-    quantity: Int!
-}
-input PaginationInput{
-    skip: Int!
-    take: Int!
-}
-input AccountInput{
-    name: String!
-}
-input ProductInput{
-    name: String!
-    price: Float!
-    description: String!
-}
-input OrderProductInput{
-    id: String!
-    quantity    : Int!
-}
-input OrderInput{
-    accountId : String!
-    products  : [OrderProductInput!]!
+type Account {
+  id: String!
+  name: String!
+  orders: [Order!]! # orders nested under Account
 }
 
-type Mutation{
-    createAccount(account: AccountInput!): Account!
-    createProduct(product: ProductInput!): Product!
-    createOrder(order: OrderInput!): Order!
+type Product {
+  id: String!
+  name: String!
+  price: Float!
+  description: String!
 }
-type Query{
-    accounts(pagination: PaginationInput!, id : String): [Account!]!
-    products(pagination: PaginationInput!, query : String, id : String): [Product!]!
+
+type Order {
+  id: String!
+  createdAt: Time!
+  accountId: String!
+  totalPrice: Float!
+  products: [OrderProduct!]!
+}
+
+type OrderProduct {
+  id: String!
+  name: String!
+  description: String!
+  price: Float!
+  quantity: Int! # matches uint64 in Go (GraphQL doesn’t support unsigned types)
+}
+
+input PaginationInput {
+  skip: Int!
+  take: Int!
+}
+
+input AccountInput {
+  name: String!
+}
+
+input ProductInput {
+  name: String!
+  price: Float!
+  description: String!
+}
+
+input OrderProductInput {
+  id: String!
+  quantity: Int!
+}
+
+input OrderInput {
+  accountId: String!
+  products: [OrderProductInput!]!
+}
+
+type Mutation {
+  createAccount(account: AccountInput!): Account!
+  createProduct(product: ProductInput!): Product!
+  createOrder(order: OrderInput!): Order!
+}
+
+type Query {
+  accounts(pagination: PaginationInput!, id: String): [Account!]!
+  products(pagination: PaginationInput!, query: String, id: String): [Product!]!
+  # orders query removed because it is nested under Account
 }
